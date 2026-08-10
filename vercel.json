@@ -1,13 +1,1 @@
-{
-  "version": 2,
-  "functions": {
-    "api/**/*.js": {
-      "runtime": "nodejs20.x",
-      "maxDuration": 15
-    }
-  },
-  "rewrites": [
-    { "source": "/api/options/:symbol", "destination": "/api/options?symbol=:symbol" },
-    { "source": "/api/quote/:symbol",   "destination": "/api/quote?symbol=:symbol" }
-  ]
-}
+{"version":2,"functions":{"api/**/*.js":{"maxDuration":15}},"rewrites":[{"source":"/api/options/:symbol","destination":"/api/options?symbol=:symbol"},{"source":"/api/quote/:symbol","destination":"/api/quote?symbol=:symbol"}]}
