@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kensho Momentum Dashboard | Intraday · Swing · Positional</title>
+  <meta name="description" content="Kensho Momentum Dashboard – Find the Right Stock, from the Right Sector, at the Right Time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <!-- TradingView Widget Library (free, live NSE charts) -->
+  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
+</head>
+<body>
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-icon">K</div>
+      <div class="logo-text">
+        <span class="logo-title">Kensho</span>
+        <span class="logo-sub">Momentum Dashboard</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <div class="nav-section-label">Market Intelligence</div>
+      <a class="nav-item active" data-tab="overview" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        Overview
+      </a>
+      <a class="nav-item" data-tab="momentum" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+        Momentum Scanner
+        <span class="live-badge">LIVE</span>
+      </a>
+      <a class="nav-item" data-tab="sectors" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>
+        Sector Rotation
+      </a>
+      <a class="nav-item" data-tab="themes" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+        Theme Tracker
+      </a>
+      <a class="nav-item" data-tab="sectorial-breakout" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Sectorial Breakout
+      </a>
+      <div class="nav-section-label">Opportunities</div>
+      <a class="nav-item" data-tab="opportunity-hub" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+        Opportunity Hub
+        <span class="nav-badge hot">HOT</span>
+      </a>
+      <a class="nav-item" data-tab="breakout-retest" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+        Breakout & Retest
+      </a>
+      <a class="nav-item" data-tab="mbo" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"/></svg>
+        Multi-Year Breakout
+      </a>
+      <a class="nav-item" data-tab="ipo" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+        IPO Opportunities
+      </a>
+      <div class="nav-section-label">Tools</div>
+      <a class="nav-item" data-tab="support-scanner" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="8" y1="11" x2="14" y2="11"/></svg>
+        Support Scanner
+        <span class="nav-badge" style="background:rgba(139,92,246,0.2);color:#a78bfa">NEW</span>
+      </a>
+      <a class="nav-item" data-tab="options-chain" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>
+        Options Chain
+        <span class="nav-badge" style="background:rgba(236,72,153,0.2);color:#f472b6">NSE</span>
+      </a>
+      <div class="nav-section-label">Research</div>
+      <a class="nav-item" data-tab="fundamentals" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Fundamentals
+      </a>
+      <a class="nav-item" data-tab="performance" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        Performance
+      </a>
+      <a class="nav-item" data-tab="alerts" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        Alerts
+        <span class="nav-badge alert-badge">7</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <div id="live-status" class="market-status">
+        <span class="status-dot" style="background:#f59e0b;box-shadow:0 0 8px #f59e0b"></span>
+        <span class="status-text">Connecting to Yahoo Finance…</span>
+      </div>
+      <span id="refresh-countdown"></span>
+      <div style="margin-top:8px;font-size:10px;color:var(--text-muted);line-height:1.4">
+        📊 Yahoo Finance · 15-min delayed
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content" id="main-content">
+    <header class="top-header">
+      <button class="sidebar-toggle" id="sidebar-toggle" aria-label="Toggle sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="header-market-ticker">
+        <div class="ticker-item">
+          <span class="ticker-name">NIFTY 50</span>
+          <span class="ticker-price">24,832.65</span>
+          <span class="ticker-change positive">+0.84%</span>
+        </div>
+        <div class="ticker-divider"></div>
+        <div class="ticker-item">
+          <span class="ticker-name">BANK NIFTY</span>
+          <span class="ticker-price">53,124.40</span>
+          <span class="ticker-change positive">+1.12%</span>
+        </div>
+        <div class="ticker-divider"></div>
+        <div class="ticker-item">
+          <span class="ticker-name">SENSEX</span>
+          <span class="ticker-price">81,548.30</span>
+          <span class="ticker-change negative">-0.22%</span>
+        </div>
+        <div class="ticker-divider"></div>
+        <!-- Server status pill -->
+        <div id="server-status-pill" class="server-status-pill offline" title="Click to learn more">
+          <span class="srv-dot"></span>
+          <span class="srv-label">NSE Proxy</span>
+          <span class="srv-state" id="srv-state-text">Connecting…</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="search-bar">
+          <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="Search stocks, sectors..." id="global-search" autocomplete="off" />
+        </div>
+        <button class="btn-icon" aria-label="Refresh" title="Refresh data">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+        </button>
+        <button class="btn-icon" aria-label="Notifications" title="Alerts">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="user-avatar">SR</div>
+      </div>
+    </header>
+
+    <div class="dashboard-content">
+
+      <!-- OVERVIEW -->
+      <section class="tab-content active" id="tab-overview">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">Market Overview</h1>
+            <p class="page-subtitle">Find the Right Stock, from the Right Sector, at the Right Time</p>
+          </div>
+          <span class="last-updated">Updated: Aug 10, 2026 · 3:30 PM IST</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card green-glow">
+            <div class="stat-icon-wrap green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Advancing Stocks</span><span class="stat-value">1,284</span><span class="stat-change positive">↑ 64% of NSE</span></div>
+          </div>
+          <div class="stat-card red-glow">
+            <div class="stat-icon-wrap red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 17 13.5 8.5 8.5 13.5 2 7"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Declining Stocks</span><span class="stat-value">712</span><span class="stat-change negative">↓ 36% of NSE</span></div>
+          </div>
+          <div class="stat-card blue-glow">
+            <div class="stat-icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Momentum Signals</span><span class="stat-value">48</span><span class="stat-change positive">↑ 12 new today</span></div>
+          </div>
+          <div class="stat-card orange-glow">
+            <div class="stat-icon-wrap orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Breakout Candidates</span><span class="stat-value">23</span><span class="stat-change positive">↑ 8 fresh today</span></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-2">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">🔄 Leading Sectors (1D)</h2>
+              <button class="card-action" data-tab="sectors">View All →</button>
+            </div>
+            <div class="sector-list" id="overview-sector-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">⚡ Top Momentum Stocks</h2>
+              <div class="tab-pills" id="overview-momentum-pills">
+                <button class="pill active" data-type="intraday">Intraday</button>
+                <button class="pill" data-type="swing">Swing</button>
+                <button class="pill" data-type="positional">Positional</button>
+              </div>
+            </div>
+            <div class="stock-list" id="overview-stock-list"></div>
+          </div>
+        </div>
+
+        <div class="dashboard-grid-3">
+          <div class="card">
+            <div class="card-header"><h2 class="card-title">📊 Market Breadth</h2></div>
+            <div class="breadth-chart">
+              <div class="donut-wrap">
+                <svg class="donut" viewBox="0 0 120 120">
+                  <circle class="donut-bg" cx="60" cy="60" r="50" fill="none" stroke-width="14"/>
+                  <circle class="donut-seg green-seg" cx="60" cy="60" r="50" fill="none" stroke-width="14" stroke-dasharray="199 115" stroke-dashoffset="0"/>
+                  <circle class="donut-seg red-seg" cx="60" cy="60" r="50" fill="none" stroke-width="14" stroke-dasharray="82 232" stroke-dashoffset="-199"/>
+                  <circle class="donut-seg gray-seg" cx="60" cy="60" r="50" fill="none" stroke-width="14" stroke-dasharray="33 281" stroke-dashoffset="-281"/>
+                  <text x="50%" y="48%" dominant-baseline="middle" text-anchor="middle" class="donut-label">64%</text>
+                  <text x="50%" y="60%" dominant-baseline="middle" text-anchor="middle" class="donut-sublabel">Advancing</text>
+                </svg>
+              </div>
+              <div class="breadth-legend">
+                <div class="legend-item"><span class="dot green"></span><span>Advancing: 1,284</span></div>
+                <div class="legend-item"><span class="dot red"></span><span>Declining: 712</span></div>
+                <div class="legend-item"><span class="dot gray"></span><span>Unchanged: 164</span></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2 class="card-title">🔥 Hot Themes</h2></div>
+            <div class="themes-grid" id="overview-themes"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><h2 class="card-title">🔔 Today's Alerts</h2><span class="badge-count">7</span></div>
+            <div class="alert-list" id="overview-alerts"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- MOMENTUM SCANNER -->
+      <section class="tab-content" id="tab-momentum">
+        <div class="page-header">
+          <div><h1 class="page-title">⚡ Momentum Scanner</h1><p class="page-subtitle">Stocks showing price & volume strength across multiple timeframes</p></div>
+          <div class="header-controls">
+            <div class="filter-group">
+              <select class="filter-select" id="momentum-type-filter"><option>All</option><option>Intraday</option><option>Swing</option><option>Positional</option></select>
+              <select class="filter-select" id="momentum-sector-filter"><option>All Sectors</option><option>IT</option><option>Banking</option><option>FMCG</option><option>Pharma</option><option>Capital Goods</option><option>Metals</option></select>
+              <select class="filter-select" id="momentum-setup-filter"><option>All Setups</option><option>Breakout</option><option>Retest</option><option>Momentum</option><option>Continuation</option></select>
+            </div>
+          </div>
+        </div>
+        <div class="timeframe-tabs">
+          <button class="tf-tab active" data-tf="1d">1D</button>
+          <button class="tf-tab" data-tf="weekly">Weekly</button>
+          <button class="tf-tab" data-tf="monthly">Monthly</button>
+          <button class="tf-tab" data-tf="quarterly">Quarterly</button>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table" id="momentum-table">
+              <thead>
+                <tr>
+                  <th>Symbol</th><th>Sector · Industry</th><th>LTP</th><th>1D%</th><th>Vol/Avg</th><th>Score</th><th>Setup</th><th>Signals</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="momentum-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTOR ROTATION -->
+      <section class="tab-content" id="tab-sectors">
+        <div class="page-header">
+          <div><h1 class="page-title">🔄 Sector & Industry Rotation</h1><p class="page-subtitle">Understand where strength and participation are developing</p></div>
+          <div class="period-selector" id="sector-period-sel">
+            <button class="period-btn active" data-period="1d">1D</button>
+            <button class="period-btn" data-period="7d">7D</button>
+            <button class="period-btn" data-period="15d">15D</button>
+            <button class="period-btn" data-period="30d">30D</button>
+            <button class="period-btn" data-period="3m">3M</button>
+            <button class="period-btn" data-period="6m">6M</button>
+            <button class="period-btn" data-period="1y">1Y</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Sector Heatmap vs Nifty 50</h2>
+            <div class="heatmap-legend">
+              <span class="hm-label neg">Under</span>
+              <div class="hm-gradient"></div>
+              <span class="hm-label pos">Out</span>
+            </div>
+          </div>
+          <div class="heatmap-grid" id="heatmap-grid"></div>
+        </div>
+        <div class="card no-pad" style="margin-top:1.5rem">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Sector / Industry</th><th>1D</th><th>7D</th><th>30D</th><th>Adv/Dec</th><th>Money Flow</th><th>Signals</th><th>Theme</th></tr>
+              </thead>
+              <tbody id="sector-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- THEMES -->
+      <section class="tab-content" id="tab-themes">
+        <div class="page-header">
+          <div><h1 class="page-title">🔥 Theme Tracker</h1><p class="page-subtitle">Track important market themes and participating stocks</p></div>
+        </div>
+        <div class="themes-list" id="themes-list"></div>
+      </section>
+
+      <!-- SECTORIAL BREAKOUT -->
+      <section class="tab-content" id="tab-sectorial-breakout">
+        <div class="page-header">
+          <div><h1 class="page-title">🚀 Sectorial Breakout</h1><p class="page-subtitle">Sectors and industries showing technical breakout behaviour</p></div>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Sector / Industry</th><th>Breakout Level</th><th>Current</th><th>% Above BO</th><th>Vol Surge</th><th>Stocks in Move</th><th>Chart</th></tr>
+              </thead>
+              <tbody id="sectorial-breakout-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- OPPORTUNITY HUB -->
+      <section class="tab-content" id="tab-opportunity-hub">
+        <div class="page-header">
+          <div><h1 class="page-title">🎯 Opportunity Hub</h1><p class="page-subtitle">Holding-period specific watchlists with trade levels</p></div>
+        </div>
+        <div class="opp-type-selector" id="opp-type-selector">
+          <button class="opp-type-btn active" data-type="intraday"><span>📊</span><span>Intraday</span><span class="type-count">12</span></button>
+          <button class="opp-type-btn" data-type="swing"><span>📈</span><span>Swing</span><span class="type-count">18</span></button>
+          <button class="opp-type-btn" data-type="positional"><span>🚀</span><span>Positional</span><span class="type-count">9</span></button>
+          <button class="opp-type-btn" data-type="investor"><span>💼</span><span>Investor</span><span class="type-count">7</span></button>
+          <button class="opp-type-btn" data-type="mbo-opp"><span>🔥</span><span>Multi-Yr BO</span><span class="type-count">5</span></button>
+          <button class="opp-type-btn" data-type="ipo-opp"><span>🆕</span><span>IPO</span><span class="type-count">4</span></button>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symbol</th><th>Sector</th><th>LTP</th><th>Support</th><th>Entry</th><th>Stop Loss</th><th>Target 1</th><th>Target 2</th><th>R:R</th><th>Signal</th><th>Chart</th></tr>
+              </thead>
+              <tbody id="opp-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- BREAKOUT & RETEST -->
+      <section class="tab-content" id="tab-breakout-retest">
+        <div class="page-header">
+          <div><h1 class="page-title">🔁 Breakout & Retest</h1><p class="page-subtitle">Stocks that crossed an important level — structured retest opportunities</p></div>
+          <div class="filter-group">
+            <select class="filter-select"><option>All Types</option><option>ATH Retest</option><option>Horizontal Retest</option><option>Trendline Retest</option></select>
+          </div>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symbol</th><th>Sector</th><th>Breakout Level</th><th>LTP</th><th>Distance to BO</th><th>Type</th><th>Stop Loss</th><th>Target</th><th>R:R</th><th>Chart</th></tr>
+              </thead>
+              <tbody id="retest-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- MULTI-YEAR BREAKOUT -->
+      <section class="tab-content" id="tab-mbo">
+        <div class="page-header">
+          <div><h1 class="page-title">🏆 Multi-Year Breakout</h1><p class="page-subtitle">Stocks approaching or crossing multi-year resistance and long-term consolidation zones</p></div>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symbol</th><th>Sector</th><th>Resistance Level</th><th>LTP</th><th>Type</th><th>Consolidation Period</th><th>Vol Surge</th><th>Chart</th></tr>
+              </thead>
+              <tbody id="mbo-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- IPO -->
+      <section class="tab-content" id="tab-ipo">
+        <div class="page-header">
+          <div><h1 class="page-title">🆕 IPO Opportunities</h1><p class="page-subtitle">Recently listed companies showing momentum, breakouts & accumulation</p></div>
+        </div>
+        <div class="card no-pad">
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead>
+                <tr><th>Symbol</th><th>Sector</th><th>Listed</th><th>Issue Price</th><th>LTP</th><th>vs Issue %</th><th>Setup</th><th>Signal</th><th>Chart</th></tr>
+              </thead>
+              <tbody id="ipo-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- FUNDAMENTALS -->
+      <section class="tab-content" id="tab-fundamentals">
+        <div class="page-header">
+          <div><h1 class="page-title">💰 Fundamental Intelligence</h1><p class="page-subtitle">Business strength + technical confirmation in one place</p></div>
+        </div>
+        <div class="fund-tabs" id="fund-tabs">
+          <button class="fund-tab active" data-ftab="analysis">🧾 Fundamentals</button>
+          <button class="fund-tab" data-ftab="blockbuster">🌟 Blockbuster Results</button>
+          <button class="fund-tab" data-ftab="pead">📊 PEAD Stocks</button>
+          <button class="fund-tab" data-ftab="announcements">📢 Announcements</button>
+          <button class="fund-tab" data-ftab="rally-reason">🔍 Rally Reason Analyzer</button>
+        </div>
+        <div class="fund-tab-content active" id="ftab-analysis">
+          <div class="card no-pad">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Symbol</th><th>Sector</th><th>Revenue Growth</th><th>PAT Growth</th><th>ROE</th><th>P/E</th><th>Earnings Quality</th><th>Valuation</th></tr></thead>
+                <tbody id="fund-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="fund-tab-content" id="ftab-blockbuster">
+          <div class="card no-pad">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Symbol</th><th>Quarter</th><th>Revenue Growth</th><th>PAT Growth</th><th>Margin</th><th>Op. Leverage</th><th>Quality</th><th>Flags</th></tr></thead>
+                <tbody id="blockbuster-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="fund-tab-content" id="ftab-pead">
+          <div class="card" style="text-align:center;color:var(--text-muted);padding:3rem">
+            <div style="font-size:3rem;margin-bottom:1rem">📊</div>
+            <p>Select a result period to view PEAD (Post-Earnings Announcement Drift) stocks.</p>
+            <div class="filter-group" style="justify-content:center;margin-top:1rem">
+              <select class="filter-select"><option>Q1 FY26 (Apr-Jun)</option><option>Q4 FY25 (Jan-Mar)</option><option>Q3 FY25 (Oct-Dec)</option></select>
+              <button class="btn-primary" style="margin-left:0.5rem">Load PEAD Stocks</button>
+            </div>
+          </div>
+        </div>
+        <div class="fund-tab-content" id="ftab-announcements">
+          <div class="card no-pad">
+            <div class="table-wrap">
+              <table class="data-table">
+                <thead><tr><th>Symbol</th><th>Category</th><th>Importance</th><th>Signal</th><th>Date</th><th>Details</th></tr></thead>
+                <tbody id="announce-tbody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+        <div class="fund-tab-content" id="ftab-rally-reason">
+          <div class="card">
+            <h3 style="margin-bottom:1rem;color:var(--text-primary)">🔍 Rally Reason Analyzer</h3>
+            <p style="color:var(--text-muted);margin-bottom:1.5rem">Understand possible reasons behind a stock's move by combining technical, fundamental, earnings and event data.</p>
+            <div class="search-stock-row">
+              <input type="text" class="stock-input" placeholder="Enter symbol e.g. INFY" id="rally-stock-input" />
+              <button class="btn-primary" id="rally-analyze-btn">Analyze</button>
+            </div>
+            <div class="rally-result hidden" id="rally-result"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PERFORMANCE -->
+      <section class="tab-content" id="tab-performance">
+        <div class="page-header">
+          <div><h1 class="page-title">📊 Performance Tracker</h1><p class="page-subtitle">What happens after signals, patterns and alerts are generated</p></div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card green-glow">
+            <div class="stat-icon-wrap green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Pattern Win Rate</span><span class="stat-value">68.4%</span><span class="stat-change positive">Last 90 days</span></div>
+          </div>
+          <div class="stat-card blue-glow">
+            <div class="stat-icon-wrap blue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Signal Win Rate</span><span class="stat-value">61.2%</span><span class="stat-change positive">Last 90 days</span></div>
+          </div>
+          <div class="stat-card orange-glow">
+            <div class="stat-icon-wrap orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 22 22 22"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Alert Avg Return</span><span class="stat-value">+12.8%</span><span class="stat-change positive">Per alert fired</span></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon-wrap green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+            <div class="stat-info"><span class="stat-label">Signals Tracked</span><span class="stat-value">1,824</span><span class="stat-change positive">Since inception</span></div>
+          </div>
+        </div>
+        <div class="card no-pad" style="margin-top:1.5rem">
+          <div class="card-header padded"><h2 class="card-title">Pattern Performance Breakdown</h2></div>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Pattern / Setup</th><th>Signals</th><th>Win Rate</th><th>Avg Return</th><th>Avg Hold (Days)</th><th>Best Sector</th></tr></thead>
+              <tbody id="perf-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ALERTS -->
+      <section class="tab-content" id="tab-alerts">
+        <div class="page-header">
+          <div><h1 class="page-title">🔔 Telegram Alerts</h1><p class="page-subtitle">Real-time stock alerts with performance tracking</p></div>
+          <a class="btn-telegram" href="#" target="_blank">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.562 8.248l-2.008 9.455c-.148.658-.537.818-1.084.508l-3-2.21-1.447 1.394c-.16.16-.295.295-.605.295l.213-3.053 5.56-5.023c.242-.213-.054-.333-.373-.12l-6.871 4.326-2.962-.924c-.643-.204-.657-.643.136-.953l11.57-4.461c.537-.194 1.006.131.871.766z"/></svg>
+            Join Telegram Channel
+          </a>
+        </div>
+        <div class="alert-log" id="alert-log"></div>
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           SUPPORT SCANNER
+      ════════════════════════════════════════════════════════ -->
+      <section class="tab-content" id="tab-support-scanner">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">📐 Support Level Scanner</h1>
+            <p class="page-subtitle">Automatically identifies key support zones from 6-month OHLCV price history</p>
+          </div>
+        </div>
+
+        <!-- Mode Selector -->
+        <div class="ss-mode-selector">
+          <button class="ss-mode-btn active" id="ss-mode-single" onclick="setScanMode('single')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+            Single Stock
+          </button>
+          <button class="ss-mode-btn" id="ss-mode-bulk" onclick="setScanMode('bulk')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            Bulk Scan (All Watchlist)
+          </button>
+        </div>
+
+        <!-- Single Stock Panel -->
+        <div id="ss-single-panel">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">Scan a Stock</span>
+              <div class="ss-params">
+                <select class="filter-select" id="ss-timeframe">
+                  <option value="3mo">3 Months</option>
+                  <option value="6mo" selected>6 Months</option>
+                  <option value="1y">1 Year</option>
+                  <option value="2y">2 Years</option>
+                </select>
+                <select class="filter-select" id="ss-interval">
+                  <option value="1d" selected>Daily</option>
+                  <option value="1wk">Weekly</option>
+                </select>
+                <select class="filter-select" id="ss-lookback">
+                  <option value="3">Sensitivity: High (3)</option>
+                  <option value="5" selected>Sensitivity: Med (5)</option>
+                  <option value="8">Sensitivity: Low (8)</option>
+                </select>
+              </div>
+            </div>
+            <div class="ss-input-row">
+              <input type="text" id="ss-symbol-input" class="stock-input"
+                placeholder="Enter NSE symbol… e.g. INFY" maxlength="20"
+                style="max-width:260px;font-size:15px;letter-spacing:1px" />
+              <button class="btn-primary" id="ss-scan-btn" onclick="runSingleScan()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:6px;vertical-align:middle"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Scan Supports
+              </button>
+              <div class="ss-presets">
+                <span style="font-size:12px;color:var(--text-muted)">Quick:</span>
+                <button class="pill" onclick="quickScan('INFY')">INFY</button>
+                <button class="pill" onclick="quickScan('TCS')">TCS</button>
+                <button class="pill" onclick="quickScan('DIXON')">DIXON</button>
+                <button class="pill" onclick="quickScan('HAL')">HAL</button>
+                <button class="pill" onclick="quickScan('TITAN')">TITAN</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Result Area -->
+          <div id="ss-result" class="ss-result hidden">
+            <!-- Chart + Summary side by side -->
+            <div class="ss-chart-row">
+              <!-- Canvas Chart -->
+              <div class="card ss-chart-card">
+                <div class="card-header">
+                  <span class="card-title" id="ss-chart-title">Price Chart with Support Zones</span>
+                  <div style="display:flex;align-items:center;gap:12px">
+                    <span class="ss-legend-item"><span class="ss-legend-dot" style="background:#10b981"></span>Strong</span>
+                    <span class="ss-legend-item"><span class="ss-legend-dot" style="background:#f59e0b"></span>Moderate</span>
+                    <span class="ss-legend-item"><span class="ss-legend-dot" style="background:#64748b"></span>Weak</span>
+                    <span class="ss-legend-item"><span class="ss-legend-dot" style="background:#3b82f6"></span>EMA</span>
+                  </div>
+                </div>
+                <div style="position:relative;overflow:hidden;border-radius:0 0 12px 12px">
+                  <canvas id="ss-canvas" style="width:100%;height:340px;display:block"></canvas>
+                </div>
+              </div>
+
+              <!-- Summary Cards -->
+              <div class="ss-summary-col">
+                <div class="card ss-stat-card">
+                  <div class="ss-stat-label">Current Price</div>
+                  <div class="ss-stat-value" id="ss-cur-price" style="color:var(--text-primary)">—</div>
+                </div>
+                <div class="card ss-stat-card">
+                  <div class="ss-stat-label">Nearest Support</div>
+                  <div class="ss-stat-value" id="ss-near-sup" style="color:#10b981">—</div>
+                  <div class="ss-stat-sub" id="ss-near-dist"></div>
+                </div>
+                <div class="card ss-stat-card">
+                  <div class="ss-stat-label">Levels Found</div>
+                  <div class="ss-stat-value" id="ss-count" style="color:var(--accent-blue-light)">—</div>
+                </div>
+                <div class="card ss-stat-card">
+                  <div class="ss-stat-label">Strongest Level</div>
+                  <div class="ss-stat-value" id="ss-strongest" style="color:#f59e0b">—</div>
+                  <div class="ss-stat-sub" id="ss-strongest-score"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Support Levels Table -->
+            <div class="card no-pad mt-4">
+              <div class="card-header padded">
+                <span class="card-title">Identified Support Levels</span>
+                <span class="ss-data-note">📊 Yahoo Finance · 15-min delayed · Algo: Swing Low + Volume Clustering</span>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table" id="ss-levels-table">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Support Level</th>
+                      <th>Strength</th>
+                      <th>Score</th>
+                      <th>Type</th>
+                      <th>Touches</th>
+                      <th>Dist. from CMP</th>
+                      <th>Vol at Level</th>
+                      <th>Last Tested</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ss-levels-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- EMA Levels -->
+            <div class="card mt-4">
+              <div class="card-header">
+                <span class="card-title">Dynamic EMA Support Levels</span>
+              </div>
+              <div class="ss-ema-grid" id="ss-ema-grid"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bulk Scan Panel -->
+        <div id="ss-bulk-panel" class="hidden">
+          <div class="card" style="margin-bottom:16px">
+            <div class="card-header">
+              <span class="card-title">Bulk Support Scan — All Watchlist Stocks</span>
+              <button class="btn-primary" id="ss-bulk-btn" onclick="runBulkScan()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:6px;vertical-align:middle"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                Scan All Stocks
+              </button>
+            </div>
+            <p style="font-size:13px;color:var(--text-muted);margin-top:4px">Fetches 6-month daily data for all watchlist stocks and identifies the nearest support for each. Takes ~20-30 seconds.</p>
+            <div class="ss-bulk-progress hidden" id="ss-bulk-progress">
+              <div class="ss-progress-bar"><div class="ss-progress-fill" id="ss-progress-fill"></div></div>
+              <span class="ss-progress-label" id="ss-progress-label">Scanning…</span>
+            </div>
+          </div>
+          <div id="ss-bulk-result" class="hidden">
+            <div class="card no-pad">
+              <div class="card-header padded">
+                <span class="card-title">Bulk Scan Results</span>
+                <span class="ss-data-note">Sorted by: Nearest support (% distance from CMP)</span>
+              </div>
+              <div class="table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Symbol</th>
+                      <th>CMP</th>
+                      <th>Nearest Support</th>
+                      <th>Distance</th>
+                      <th>Support Strength</th>
+                      <th>20 EMA</th>
+                      <th>50 EMA</th>
+                      <th>200 EMA</th>
+                      <th>Levels Found</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ss-bulk-tbody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ═══════════════════════════════════════════════════════
+           OPTIONS CHAIN
+      ════════════════════════════════════════════════════════ -->
+      <section class="tab-content" id="tab-options-chain">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">📋 Options Chain</h1>
+            <p class="page-subtitle">Live NSE options data — OI, LTP, IV, PCR &amp; Max Pain</p>
+          </div>
+          <div id="oc-server-note" class="oc-server-note">
+            <span id="oc-data-source">⏳ Checking server…</span>
+          </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="oc-controls card">
+          <div class="oc-control-row">
+            <div class="oc-sym-btns" id="oc-sym-btns">
+              <button class="oc-sym-btn active" data-sym="NIFTY"    onclick="loadOptionsChain('NIFTY')">NIFTY</button>
+              <button class="oc-sym-btn"        data-sym="BANKNIFTY" onclick="loadOptionsChain('BANKNIFTY')">BANKNIFTY</button>
+              <button class="oc-sym-btn"        data-sym="FINNIFTY"  onclick="loadOptionsChain('FINNIFTY')">FINNIFTY</button>
+              <button class="oc-sym-btn"        data-sym="MIDCPNIFTY" onclick="loadOptionsChain('MIDCPNIFTY')">MIDCPNIFTY</button>
+            </div>
+            <div class="oc-expiry-wrap">
+              <label style="font-size:12px;color:var(--text-muted)">Expiry</label>
+              <select class="filter-select" id="oc-expiry-select" onchange="onOCExpiryChange()"></select>
+            </div>
+            <button class="btn-primary" onclick="refreshOptionsChain()" id="oc-refresh-btn">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="display:inline;margin-right:5px;vertical-align:middle"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+              Refresh
+            </button>
+            <span class="oc-timestamp" id="oc-timestamp"></span>
+          </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="oc-summary-grid" id="oc-summary-grid">
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">Underlying</div>
+            <div class="oc-stat-value" id="oc-underlying" style="color:var(--text-primary)">—</div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">ATM Strike</div>
+            <div class="oc-stat-value" id="oc-atm" style="color:#60a5fa">—</div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">PCR (Put-Call Ratio)</div>
+            <div class="oc-stat-value" id="oc-pcr" style="color:#10b981">—</div>
+            <div class="oc-stat-sub" id="oc-pcr-signal"></div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">Max Pain</div>
+            <div class="oc-stat-value" id="oc-maxpain" style="color:#f59e0b">—</div>
+            <div class="oc-stat-sub" id="oc-maxpain-dist"></div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">Total CE OI</div>
+            <div class="oc-stat-value" id="oc-total-ce" style="color:#ef4444">—</div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">Total PE OI</div>
+            <div class="oc-stat-value" id="oc-total-pe" style="color:#10b981">—</div>
+          </div>
+          <div class="card oc-stat-card">
+            <div class="oc-stat-label">ATM IV</div>
+            <div class="oc-stat-value" id="oc-atm-iv" style="color:#a78bfa">—</div>
+          </div>
+        </div>
+
+        <!-- OI Bar Chart -->
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header">
+            <span class="card-title">Open Interest Distribution</span>
+            <div style="display:flex;gap:16px;align-items:center">
+              <span class="oc-legend"><span class="oc-legend-box" style="background:#ef4444"></span>CE OI (Resistance)</span>
+              <span class="oc-legend"><span class="oc-legend-box" style="background:#10b981"></span>PE OI (Support)</span>
+            </div>
+          </div>
+          <div id="oc-oi-chart" class="oc-oi-chart"></div>
+        </div>
+
+        <!-- Options Chain Table -->
+        <div class="card no-pad">
+          <div class="card-header padded">
+            <span class="card-title">Options Chain</span>
+            <span class="oc-atm-note">🟡 Highlighted = ATM &nbsp; 🔴 = CE dominant &nbsp; 🟢 = PE dominant</span>
+          </div>
+          <div class="table-wrap oc-table-wrap">
+            <table class="data-table oc-table" id="oc-table">
+              <thead>
+                <tr>
+                  <th class="oc-ce-head" colspan="6">── CALLS (CE) ──</th>
+                  <th class="oc-strike-head">STRIKE</th>
+                  <th class="oc-pe-head" colspan="6">── PUTS (PE) ──</th>
+                </tr>
+                <tr>
+                  <th class="ce-col">OI</th>
+                  <th class="ce-col">Chg OI</th>
+                  <th class="ce-col">Volume</th>
+                  <th class="ce-col">IV</th>
+                  <th class="ce-col">LTP</th>
+                  <th class="ce-col oc-bar-col">OI Bar</th>
+                  <th class="strike-col">Price</th>
+                  <th class="pe-col oc-bar-col">OI Bar</th>
+                  <th class="pe-col">LTP</th>
+                  <th class="pe-col">IV</th>
+                  <th class="pe-col">Volume</th>
+                  <th class="pe-col">Chg OI</th>
+                  <th class="pe-col">OI</th>
+                </tr>
+              </thead>
+              <tbody id="oc-tbody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Loading / Error -->
+        <div id="oc-loading" class="ss-loading hidden">
+          <div class="ss-spinner"></div>
+          <span id="oc-loading-msg">Loading options chain…</span>
+        </div>
+        <div id="oc-error" class="ss-error hidden"></div>
+
+      </section>
+
+    </div><!-- end dashboard-content -->
+  </main>
+
+  <!-- Upgraded Stock Modal with TradingView chart -->
+  <div class="modal-overlay hidden" id="stock-modal" role="dialog" aria-modal="true">
+    <div class="modal-box modal-box-wide">
+      <button class="modal-close" id="modal-close-btn" aria-label="Close">&times;</button>
+      <div class="modal-content" id="modal-inner"></div>
+      <!-- TradingView chart injected here by JS -->
+      <div id="tv-chart-wrap" class="tv-chart-wrap hidden">
+        <div id="tradingview-chart" style="height:420px"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tooltip for canvas charts -->
+  <div id="ss-tooltip"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
