@@ -41,6 +41,7 @@ open index.html
 ```
 Browser
 ├── index.html + style.css + app.js  (static frontend)
+
 ├── TradingView Widget               (live NSE charts, free)
 └── /api/* endpoints                 (serverless on Vercel / Express locally)
     ├── /api/indices                 NSE → Yahoo Finance fallback
