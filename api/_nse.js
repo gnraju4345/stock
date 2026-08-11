@@ -85,14 +85,64 @@ async function nseGet(path, retried = false) {
 
 /* ── Yahoo Finance fallback (server-side — no CORS issues) ── */
 async function yfChart(yfSym, range = '2d', interval = '1d') {
-  const url = `https://query2.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=${interval}&range=${range}&includePrePost=false`;
-  const resp = await fetch(url, { headers: { 'User-Agent': UA, Accept: 'application/json' }, timeout: 8000 });
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(yfSym)}?interval=${interval}&range=${range}&includePrePost=false`;
+  const resp = await fetch(url, {
+    headers: {
+      'User-Agent': UA,
+      'Accept': 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Referer': 'https://finance.yahoo.com/',
+      'Origin': 'https://finance.yahoo.com',
+    },
+    timeout: 10000,
+  });
   if (!resp.ok) throw new Error(`YF HTTP ${resp.status}`);
   const json = await resp.json();
   if (json?.chart?.error) throw new Error(json.chart.error.description);
   const meta = json?.chart?.result?.[0]?.meta;
   if (!meta) throw new Error('No YF meta');
   return meta;
+}
+
+/* ── Yahoo Finance bulk quote (v7) — fetch up to 30 symbols at once ── */
+async function yfQuotes(symbols) {
+  if (!symbols.length) return {};
+  const syms = symbols.map(s => `${s}.NS`).join(',');
+  const url  = `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(syms)}&fields=regularMarketPrice,regularMarketChange,regularMarketChangePercent,regularMarketPreviousClose,regularMarketVolume,regularMarketDayHigh,regularMarketDayLow,regularMarketOpen,fiftyDayAverage`;
+  const resp = await fetch(url, {
+    headers: {
+      'User-Agent': UA,
+      'Accept': 'application/json',
+      'Accept-Language': 'en-US,en;q=0.9',
+      'Referer': 'https://finance.yahoo.com/',
+      'Origin': 'https://finance.yahoo.com',
+    },
+    timeout: 12000,
+  });
+  if (!resp.ok) throw new Error(`YF-bulk HTTP ${resp.status}`);
+  const json = await resp.json();
+  const quotes = json?.quoteResponse?.result || [];
+  const out = {};
+  for (const q of quotes) {
+    // Strip .NS suffix to get clean symbol key
+    const sym = (q.symbol || '').replace(/\.NS$/i, '');
+    if (!sym) continue;
+    const prev = q.regularMarketPreviousClose || q.regularMarketPrice || 0;
+    out[sym] = {
+      lastPrice: q.regularMarketPrice || 0,
+      change:    q.regularMarketChange || 0,
+      pChange:   q.regularMarketChangePercent || 0,
+      open:      q.regularMarketOpen || 0,
+      high:      q.regularMarketDayHigh || 0,
+      low:       q.regularMarketDayLow || 0,
+      prevClose: prev,
+      vwap:      0,
+      volume:    q.regularMarketVolume || 0,
+      avgVol50d: q.fiftyDayAverage || 0,
+      source:    'YF',
+    };
+  }
+  return out;
 }
 
 /* ── CORS headers helper ── */
@@ -105,4 +155,5 @@ function cors(res) {
 
 function safeNum(v) { return typeof v === 'number' ? v : parseFloat(v) || 0; }
 
-module.exports = { nseGet, yfChart, cors, safeNum, refreshNSECookie };
+module.exports = { nseGet, yfChart, yfQuotes, cors, safeNum, refreshNSECookie };
+

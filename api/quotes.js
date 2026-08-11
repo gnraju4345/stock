@@ -1,5 +1,5 @@
 'use strict';
-const { nseGet, yfChart, cors, safeNum } = require('./_nse');
+const { nseGet, yfQuotes, cors, safeNum } = require('./_nse');
 
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { cors(res); return res.status(200).end(); }
@@ -10,52 +10,46 @@ module.exports = async (req, res) => {
 
   if (!symbols.length) return res.json({ ok: true, data: {}, count: 0 });
 
-  // Fetch all in parallel — NSE with YF fallback per symbol
-  const results = await Promise.allSettled(
-    symbols.map(sym => fetchOne(sym))
+  const data = {};
+
+  // Step 1 — Try NSE for all symbols in parallel
+  const nseResults = await Promise.allSettled(
+    symbols.map(sym => nseGet(`quote-equity?symbol=${encodeURIComponent(sym)}`))
   );
 
-  const data = {};
-  results.forEach((r, i) => {
-    if (r.status === 'fulfilled' && r.value) data[symbols[i]] = r.value;
+  const needYF = [];
+  nseResults.forEach((r, i) => {
+    const sym = symbols[i];
+    if (r.status === 'fulfilled' && r.value?.priceInfo) {
+      const pi = r.value.priceInfo;
+      data[sym] = {
+        lastPrice:  safeNum(pi.lastPrice),
+        change:     safeNum(pi.change),
+        pChange:    safeNum(pi.pChange),
+        open:       safeNum(pi.open),
+        high:       safeNum(pi.intraDayHighLow?.max),
+        low:        safeNum(pi.intraDayHighLow?.min),
+        prevClose:  safeNum(pi.previousClose),
+        vwap:       safeNum(pi.vwap),
+        volume:     safeNum(r.value?.securityWiseDP?.quantityTraded),
+        upperCP:    safeNum(pi.upperCP),
+        lowerCP:    safeNum(pi.lowerCP),
+        source:     'NSE',
+      };
+    } else {
+      needYF.push(sym);
+    }
   });
+
+  // Step 2 — Bulk Yahoo Finance fallback for all symbols NSE missed
+  if (needYF.length) {
+    try {
+      const yfData = await yfQuotes(needYF);
+      Object.assign(data, yfData);
+    } catch (e) {
+      console.warn('[quotes] YF bulk fallback failed:', e.message);
+    }
+  }
 
   res.json({ ok: true, data, count: Object.keys(data).length, ts: new Date().toISOString() });
 };
-
-async function fetchOne(sym) {
-  // 1. Try NSE
-  try {
-    const raw = await nseGet(`quote-equity?symbol=${encodeURIComponent(sym)}`);
-    const pi = raw?.priceInfo;
-    if (pi) return {
-      lastPrice:  safeNum(pi.lastPrice),
-      change:     safeNum(pi.change),
-      pChange:    safeNum(pi.pChange),
-      open:       safeNum(pi.open),
-      high:       safeNum(pi.intraDayHighLow?.max),
-      low:        safeNum(pi.intraDayHighLow?.min),
-      prevClose:  safeNum(pi.previousClose),
-      vwap:       safeNum(pi.vwap),
-      upperCP:    safeNum(pi.upperCP),
-      lowerCP:    safeNum(pi.lowerCP),
-      source:     'NSE',
-    };
-  } catch (_) {}
-
-  // 2. Yahoo Finance fallback (server-side — no CORS)
-  try {
-    const m    = await yfChart(`${sym}.NS`);
-    const prev = m.chartPreviousClose || m.regularMarketPrice;
-    return {
-      lastPrice: m.regularMarketPrice,
-      change:    m.regularMarketPrice - prev,
-      pChange:   +((m.regularMarketPrice - prev) / prev * 100).toFixed(2),
-      prevClose: prev,
-      vwap:      0,
-      source:    'YF',
-    };
-  } catch (_) {}
-
-  return null;
-}
