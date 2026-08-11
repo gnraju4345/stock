@@ -1,18 +1,31 @@
 {
   "version": 2,
-  "cleanUrls": true,
-  "trailingSlash": false,
-  "functions": {
-    "api/**/*.js": {
-      "maxDuration": 15
-    }
-  },
-  "rewrites": [
-    { "source": "/api/options/:symbol", "destination": "/api/options?symbol=:symbol" },
-    { "source": "/api/quote/:symbol",   "destination": "/api/quote?symbol=:symbol"   },
-    { "source": "/((?!api/).*)",        "destination": "/index.html"                 }
+  "builds": [
+    { "src": "public/**",           "use": "@vercel/static" },
+    { "src": "api/indices.js",      "use": "@vercel/node"   },
+    { "src": "api/quotes.js",       "use": "@vercel/node"   },
+    { "src": "api/quote.js",        "use": "@vercel/node"   },
+    { "src": "api/options.js",      "use": "@vercel/node"   },
+    { "src": "api/status.js",       "use": "@vercel/node"   },
+    { "src": "api/market-status.js","use": "@vercel/node"   },
+    { "src": "api/gainers-losers.js","use": "@vercel/node"  },
+    { "src": "api/fii-dii.js",      "use": "@vercel/node"   }
+  ],
+  "routes": [
+    { "src": "/api/options/([^/]+)", "dest": "/api/options?symbol=$1" },
+    { "src": "/api/quote/([^/]+)",   "dest": "/api/quote?symbol=$1"   },
+    { "src": "/api/indices",         "dest": "/api/indices"           },
+    { "src": "/api/quotes",          "dest": "/api/quotes"            },
+    { "src": "/api/status",          "dest": "/api/status"            },
+    { "src": "/api/market-status",   "dest": "/api/market-status"     },
+    { "src": "/api/gainers-losers",  "dest": "/api/gainers-losers"    },
+    { "src": "/api/fii-dii",         "dest": "/api/fii-dii"           },
+    { "src": "/app.js",              "dest": "/public/app.js"         },
+    { "src": "/style.css",           "dest": "/public/style.css"      },
+    { "src": "/(.*)",                "dest": "/public/index.html"     }
   ]
 }
+
 
 
 
