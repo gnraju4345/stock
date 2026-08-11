@@ -1,5 +1,5 @@
 'use strict';
-const { nseGet, cors, safeNum } = require('../_nse');
+const { nseGet, cors, safeNum } = require('./_nse');
 
 const INDEX_SYMS = ['NIFTY', 'BANKNIFTY', 'FINNIFTY', 'MIDCPNIFTY', 'SENSEX'];
 

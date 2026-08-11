@@ -24,6 +24,7 @@ module.exports = async (req, res) => {
         open: safeNum(row.open), high: safeNum(row.high), low: safeNum(row.low),
         prevClose: safeNum(row.previousClose),
         advances: safeNum(row.advances), declines: safeNum(row.declines),
+        unchanged: safeNum(row.unchanged),
         source: 'NSE',
       };
     }

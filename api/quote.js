@@ -1,5 +1,5 @@
 'use strict';
-const { nseGet, yfChart, cors, safeNum } = require('../_nse');
+const { nseGet, yfChart, cors, safeNum } = require('./_nse');
 
 module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') { cors(res); return res.status(200).end(); }

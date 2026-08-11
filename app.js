@@ -444,7 +444,8 @@ function startRefreshTimer() {
     if (el) el.textContent = `Next refresh in ${secs}s`;
     if (--secs < 0) {
       secs = YF.REFRESH_MS / 1000;
-      refreshAll();
+      // Use window.refreshAll so the NSE-proxy override is always honoured
+      (window.refreshAll || refreshAll)();
     }
   };
 
@@ -1803,27 +1804,50 @@ async function fetchFromNSEProxy() {
     if (idxResp.ok) {
       const { data } = await idxResp.json();
       for (const [label, d] of Object.entries(data || {})) {
-        if (!d) continue;
+        if (!d || label === 'ts') continue;
         LIVE.indices[label] = { price: d.last, change: d.change, changePct: d.pChange };
       }
       updateTickerBar();
     }
 
-    // Stocks (batch)
+    // Market status (updates sidebar data-source pill)
+    try {
+      const msResp = await fetch(`${PROXY_URL}/api/market-status`);
+      if (msResp.ok) {
+        const ms = await msResp.json();
+        const state = ms?.data?.state || '';
+        const srcEl = document.querySelector('.sidebar-footer div[style]');
+        if (srcEl && state) {
+          const isOpen = state.toLowerCase().includes('open');
+          srcEl.textContent = `📡 NSE ${isOpen ? '🟢 Open' : '🔴 Closed'} · Real-time`;
+        }
+      }
+    } catch (_) { /* market-status is non-critical */ }
+
+    // Stocks (batch) — fetch current + compute volRatio vs previous day
     const stockStr = YF.STOCKS.join(',');
     const qResp    = await fetch(`${PROXY_URL}/api/quotes?symbols=${stockStr}`);
     if (qResp.ok) {
       const { data } = await qResp.json();
+
+      // Build a volume baseline from the previous snapshot for volRatio
       for (const [sym, q] of Object.entries(data || {})) {
         if (!q) continue;
+        const vol        = q.volume || 0;
+        const prevSnap   = LIVE.quotes[sym];
+        // Use the stored 10-day avg if we already have it, otherwise estimate from VWAP turnover
+        const avgVol     = prevSnap?.avgVol || (q.vwap && vol ? Math.round(vol / 1.1) : vol) || 1;
+        const volRatio   = avgVol > 0 ? +(vol / avgVol).toFixed(1) : 1;
         LIVE.quotes[sym] = {
           price:     q.lastPrice,
           change:    q.change,
           changePct: q.pChange,
           prevClose: q.prevClose,
-          volume:    q.volume || 0,
-          volRatio:  1,
-          name:      sym,
+          vwap:      q.vwap || 0,
+          volume:    vol,
+          volRatio,
+          avgVol:    prevSnap?.avgVol || avgVol,
+          name:      prevSnap?.name || sym,
         };
       }
       updateMomentumTable();

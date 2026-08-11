@@ -34,18 +34,30 @@ function jarStr(jar) {
 async function refreshNSECookie() {
   let jar = {};
   try {
+    // Step 1 — homepage (gets nsit, nseappid, etc.)
     const r1 = await fetch('https://www.nseindia.com/', {
-      headers: { ...BASE_HDR, Accept: 'text/html' }, redirect: 'follow', timeout: 8000,
+      headers: { ...BASE_HDR, Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8' },
+      redirect: 'follow', timeout: 8000,
     });
     jar = { ...jar, ...parseCookies(r1.headers.raw()['set-cookie'] || []) };
 
     await new Promise(r => setTimeout(r, 500));
 
+    // Step 2 — live market page (refreshes session)
     const r2 = await fetch('https://www.nseindia.com/market-data/live-equity-market', {
       headers: { ...BASE_HDR, Accept: 'text/html', Referer: 'https://www.nseindia.com/', Cookie: jarStr(jar) },
       redirect: 'follow', timeout: 8000,
     });
     jar = { ...jar, ...parseCookies(r2.headers.raw()['set-cookie'] || []) };
+
+    await new Promise(r => setTimeout(r, 300));
+
+    // Step 3 — option chain page (needed for options API to work reliably)
+    const r3 = await fetch('https://www.nseindia.com/option-chain', {
+      headers: { ...BASE_HDR, Accept: 'text/html', Referer: 'https://www.nseindia.com/', Cookie: jarStr(jar) },
+      redirect: 'follow', timeout: 8000,
+    });
+    jar = { ...jar, ...parseCookies(r3.headers.raw()['set-cookie'] || []) };
 
     NSE_COOKIE = jarStr(jar);
     COOKIE_TS  = Date.now();
