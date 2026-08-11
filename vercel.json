@@ -1,1 +1,18 @@
-{"version":2,"functions":{"api/**/*.js":{"maxDuration":15}},"rewrites":[{"source":"/api/options/:symbol","destination":"/api/options?symbol=:symbol"},{"source":"/api/quote/:symbol","destination":"/api/quote?symbol=:symbol"}]}
+{
+  "version": 2,
+  "functions": {
+    "api/**/*.js": {
+      "runtime": "nodejs20.x",
+      "maxDuration": 15
+    }
+  },
+  "routes": [
+    { "src": "/api/options/([^/]+)", "dest": "/api/options?symbol=$1" },
+    { "src": "/api/quote/([^/]+)",   "dest": "/api/quote?symbol=$1"   },
+    { "src": "/api/(.*)",            "dest": "/api/$1"                 },
+    { "src": "/app\\.js",            "dest": "/app.js"                 },
+    { "src": "/style\\.css",         "dest": "/style.css"              },
+    { "src": "/(.*)",                "dest": "/index.html"             }
+  ]
+}
+
