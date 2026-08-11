@@ -1,4 +1,5 @@
 'use strict';
+const { getStockQuotes } = require('./_upstox');
 const { nseGet, yfQuotes, cors, safeNum } = require('./_nse');
 
 module.exports = async (req, res) => {
@@ -6,45 +7,53 @@ module.exports = async (req, res) => {
   cors(res);
 
   const symbols = (req.query.symbols || '')
-    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean).slice(0, 30);
+    .split(',').map(s => s.trim().toUpperCase()).filter(Boolean).slice(0, 50);
 
   if (!symbols.length) return res.json({ ok: true, data: {}, count: 0 });
 
-  const data = {};
+  let data = {};
 
-  // Step 1 — Try NSE for all symbols in parallel
-  const nseResults = await Promise.allSettled(
-    symbols.map(sym => nseGet(`quote-equity?symbol=${encodeURIComponent(sym)}`))
-  );
-
-  const needYF = [];
-  nseResults.forEach((r, i) => {
-    const sym = symbols[i];
-    if (r.status === 'fulfilled' && r.value?.priceInfo) {
-      const pi = r.value.priceInfo;
-      data[sym] = {
-        lastPrice:  safeNum(pi.lastPrice),
-        change:     safeNum(pi.change),
-        pChange:    safeNum(pi.pChange),
-        open:       safeNum(pi.open),
-        high:       safeNum(pi.intraDayHighLow?.max),
-        low:        safeNum(pi.intraDayHighLow?.min),
-        prevClose:  safeNum(pi.previousClose),
-        vwap:       safeNum(pi.vwap),
-        volume:     safeNum(r.value?.securityWiseDP?.quantityTraded),
-        upperCP:    safeNum(pi.upperCP),
-        lowerCP:    safeNum(pi.lowerCP),
-        source:     'NSE',
-      };
-    } else {
-      needYF.push(sym);
-    }
-  });
-
-  // Step 2 — Bulk Yahoo Finance fallback for all symbols NSE missed
-  if (needYF.length) {
+  // 1. Try Upstox (fast, reliable, works from Vercel IPs)
+  if (process.env.UPSTOX_TOKEN) {
     try {
-      const yfData = await yfQuotes(needYF);
+      data = await getStockQuotes(symbols);
+    } catch (e) {
+      console.warn('[quotes] Upstox failed:', e.message);
+    }
+  }
+
+  // 2. For any symbols Upstox missed, try NSE
+  const missing = symbols.filter(s => !data[s]);
+  if (missing.length) {
+    const nseResults = await Promise.allSettled(
+      missing.map(sym => nseGet(`quote-equity?symbol=${encodeURIComponent(sym)}`))
+    );
+    nseResults.forEach((r, i) => {
+      const sym = missing[i];
+      if (r.status === 'fulfilled' && r.value?.priceInfo) {
+        const pi = r.value.priceInfo;
+        data[sym] = {
+          lastPrice: safeNum(pi.lastPrice),
+          change:    safeNum(pi.change),
+          pChange:   safeNum(pi.pChange),
+          open:      safeNum(pi.open),
+          high:      safeNum(pi.intraDayHighLow?.max),
+          low:       safeNum(pi.intraDayHighLow?.min),
+          prevClose: safeNum(pi.previousClose),
+          vwap:      safeNum(pi.vwap),
+          upperCP:   safeNum(pi.upperCP),
+          lowerCP:   safeNum(pi.lowerCP),
+          source:    'NSE',
+        };
+      }
+    });
+  }
+
+  // 3. Bulk Yahoo Finance fallback for still-missing symbols
+  const stillMissing = symbols.filter(s => !data[s]);
+  if (stillMissing.length) {
+    try {
+      const yfData = await yfQuotes(stillMissing);
       Object.assign(data, yfData);
     } catch (e) {
       console.warn('[quotes] YF bulk fallback failed:', e.message);
