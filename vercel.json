@@ -1,30 +1,31 @@
 {
   "version": 2,
   "builds": [
-    { "src": "public/**",           "use": "@vercel/static" },
-    { "src": "api/indices.js",      "use": "@vercel/node"   },
-    { "src": "api/quotes.js",       "use": "@vercel/node"   },
-    { "src": "api/quote.js",        "use": "@vercel/node"   },
-    { "src": "api/options.js",      "use": "@vercel/node"   },
-    { "src": "api/status.js",       "use": "@vercel/node"   },
-    { "src": "api/market-status.js","use": "@vercel/node"   },
-    { "src": "api/gainers-losers.js","use": "@vercel/node"  },
-    { "src": "api/fii-dii.js",      "use": "@vercel/node"   }
+    { "src": "public/**",            "use": "@vercel/static" },
+    { "src": "api/indices.js",       "use": "@vercel/node"   },
+    { "src": "api/quotes.js",        "use": "@vercel/node"   },
+    { "src": "api/quote.js",         "use": "@vercel/node"   },
+    { "src": "api/options.js",       "use": "@vercel/node"   },
+    { "src": "api/status.js",        "use": "@vercel/node"   },
+    { "src": "api/market-status.js", "use": "@vercel/node"   },
+    { "src": "api/gainers-losers.js","use": "@vercel/node"   },
+    { "src": "api/fii-dii.js",       "use": "@vercel/node"   }
   ],
   "routes": [
-    { "src": "/api/options/([^/]+)", "dest": "/api/options?symbol=$1" },
-    { "src": "/api/quote/([^/]+)",   "dest": "/api/quote?symbol=$1"   },
-    { "src": "/api/indices",         "dest": "/api/indices"           },
-    { "src": "/api/quotes",          "dest": "/api/quotes"            },
-    { "src": "/api/status",          "dest": "/api/status"            },
-    { "src": "/api/market-status",   "dest": "/api/market-status"     },
-    { "src": "/api/gainers-losers",  "dest": "/api/gainers-losers"    },
-    { "src": "/api/fii-dii",         "dest": "/api/fii-dii"           },
-    { "src": "/app.js",              "dest": "/public/app.js"         },
-    { "src": "/style.css",           "dest": "/public/style.css"      },
-    { "src": "/(.*)",                "dest": "/public/index.html"     }
+    { "src": "/api/options/([^/]+)", "dest": "/api/options.js?symbol=$1" },
+    { "src": "/api/quote/([^/]+)",   "dest": "/api/quote.js?symbol=$1"   },
+    { "src": "/api/indices",         "dest": "/api/indices.js"           },
+    { "src": "/api/quotes",          "dest": "/api/quotes.js"            },
+    { "src": "/api/status",          "dest": "/api/status.js"            },
+    { "src": "/api/market-status",   "dest": "/api/market-status.js"     },
+    { "src": "/api/gainers-losers",  "dest": "/api/gainers-losers.js"    },
+    { "src": "/api/fii-dii",         "dest": "/api/fii-dii.js"           },
+    { "src": "/app.js",              "dest": "/public/app.js"            },
+    { "src": "/style.css",           "dest": "/public/style.css"         },
+    { "src": "/(.*)",                "dest": "/public/index.html"        }
   ]
 }
+
 
 
 
