@@ -282,6 +282,9 @@ app.get('/api/quotes', async (req, res) => {
   res.json({ ok: true, data, count: Object.keys(data).length, ts: new Date().toISOString() });
 });
 
+/* ── NSE SYMBOL LIST (for watchlist autocomplete) ────────── */
+app.get('/api/nse-symbols', require('./api/nse-symbols'));
+
 /* ── NIFTY MOST ACTIVE / GAINERS / LOSERS ─────────────────── */
 app.get('/api/gainers-losers', async (req, res) => {
   try {

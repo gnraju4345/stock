@@ -2128,3 +2128,241 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 }, { once: false });
+
+
+/* ============================================================
+   MY WATCHLIST — Dynamic stock tracker
+   ============================================================ */
+
+const WL = {
+  stocks:    [],
+  quotes:    {},
+  symbols:   [],
+  presets:   {},
+  STORE_KEY: 'kensho_watchlist_v2',
+};
+
+function wlSave() {
+  try { localStorage.setItem(WL.STORE_KEY, JSON.stringify(WL.stocks)); } catch (_) {}
+}
+function wlLoad() {
+  try {
+    var raw = localStorage.getItem(WL.STORE_KEY);
+    if (raw) WL.stocks = JSON.parse(raw);
+  } catch (_) { WL.stocks = []; }
+}
+
+function wlFmt(n) {
+  if (!n && n !== 0) return '\u2014';
+  return n.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+function wlFmtVol(v) {
+  if (!v) return '\u2014';
+  if (v >= 1e7) return (v / 1e7).toFixed(1) + ' Cr';
+  if (v >= 1e5) return (v / 1e5).toFixed(1) + ' L';
+  return v.toLocaleString('en-IN');
+}
+
+function wlRender() {
+  var empty   = document.getElementById('wl-empty');
+  var wrap    = document.getElementById('wl-table-wrap');
+  var tbody   = document.getElementById('wl-tbody');
+  var countEl = document.getElementById('wl-count');
+  if (!tbody) return;
+  var n = WL.stocks.length;
+  if (countEl) countEl.textContent = 'Watchlist \u00b7 ' + n + ' stock' + (n !== 1 ? 's' : '');
+  if (empty)   empty.style.display  = n === 0 ? '' : 'none';
+  if (wrap)    wrap.style.display   = n === 0 ? 'none' : '';
+  tbody.innerHTML = WL.stocks.map(function(s) {
+    var sym = s.symbol;
+    var q   = WL.quotes[sym];
+    var chg = q ? q.change  : null;
+    var pct = q ? q.pChange : null;
+    var cls = pct === null ? '' : pct >= 0 ? 'positive' : 'negative';
+    var sign = pct !== null && pct >= 0 ? '+' : '';
+    var srcColors = { 'Upstox': '#10b981', 'NSE': '#60a5fa', 'YF': '#f59e0b' };
+    var srcColor  = srcColors[q && q.source] || '#6b7280';
+    return '<tr id="wl-row-' + sym + '">' +
+      '<td><strong style="font-family:var(--font-mono);font-size:13px;cursor:pointer;color:var(--accent)" onclick="openModal(\'' + sym + '\')">' + sym + '</strong></td>' +
+      '<td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;color:var(--text-secondary)">' + (s.name || sym) + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-weight:600">' + (q ? '\u20b9' + wlFmt(q.lastPrice) : '<span style="color:var(--text-muted)">\u2014</span>') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono)" class="' + cls + '">' + (chg !== null ? (chg >= 0 ? '+' : '') + wlFmt(chg) : '\u2014') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-weight:600" class="' + cls + '">' + (pct !== null ? sign + pct.toFixed(2) + '%' : '\u2014') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">' + (q && q.open  ? wlFmt(q.open)  : '\u2014') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:#10b981">'            + (q && q.high  ? wlFmt(q.high)  : '\u2014') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:#ef4444">'            + (q && q.low   ? wlFmt(q.low)   : '\u2014') + '</td>' +
+      '<td style="text-align:right;font-family:var(--font-mono);font-size:12px;color:var(--text-secondary)">' + wlFmtVol(q && q.volume) + '</td>' +
+      '<td style="text-align:center"><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:' + srcColor + '22;color:' + srcColor + ';font-weight:600">' + (q ? q.source : '\u2026') + '</span></td>' +
+      '<td style="text-align:center"><button onclick="openModal(\'' + sym + '\')" style="background:var(--surface-3);border:1px solid var(--border);color:var(--text-secondary);border-radius:5px;padding:4px 10px;font-size:11px;cursor:pointer">\ud83d\udcc8</button></td>' +
+      '<td style="text-align:center"><button onclick="wlRemove(\'' + sym + '\')" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;border-radius:5px;padding:4px 8px;font-size:12px;cursor:pointer">\u2715</button></td>' +
+      '</tr>';
+  }).join('');
+}
+
+async function wlRefreshPrices() {
+  if (!WL.stocks.length) return;
+  var statusEl = document.getElementById('wl-status');
+  if (statusEl) statusEl.textContent = '\u23f3 Fetching live prices\u2026';
+  var base  = (typeof PROXY_URL !== 'undefined' && PROXY_URL) ? PROXY_URL : '';
+  var CHUNK = 50;
+  for (var i = 0; i < WL.stocks.length; i += CHUNK) {
+    var syms = WL.stocks.slice(i, i + CHUNK).map(function(s) { return s.symbol; }).join(',');
+    try {
+      var resp = await fetch(base + '/api/quotes?symbols=' + syms);
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      var json = await resp.json();
+      for (var sym in (json.data || {})) {
+        if (json.data[sym]) WL.quotes[sym] = json.data[sym];
+      }
+      wlRender();
+    } catch (e) { console.warn('[WL] fetch failed:', e.message); }
+    if (i + CHUNK < WL.stocks.length) await new Promise(function(r) { setTimeout(r, 300); });
+  }
+  var now = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  if (statusEl) statusEl.textContent = '\u2705 Updated ' + now;
+}
+
+function wlAdd(symbol, name) {
+  symbol = symbol.toUpperCase().trim();
+  if (!symbol) return;
+  if (WL.stocks.find(function(s) { return s.symbol === symbol; })) {
+    wlFlash(symbol + ' is already in your watchlist'); return;
+  }
+  WL.stocks.push({ symbol: symbol, name: name || symbol });
+  wlSave();
+  wlRender();
+  var base = (typeof PROXY_URL !== 'undefined' && PROXY_URL) ? PROXY_URL : '';
+  fetch(base + '/api/quotes?symbols=' + symbol)
+    .then(function(r) { return r.json(); })
+    .then(function(j) { if (j.data && j.data[symbol]) { WL.quotes[symbol] = j.data[symbol]; wlRender(); } })
+    .catch(function() {});
+  wlFlash('\u2705 ' + symbol + ' added');
+}
+
+function wlRemove(symbol) {
+  WL.stocks = WL.stocks.filter(function(s) { return s.symbol !== symbol; });
+  delete WL.quotes[symbol];
+  wlSave();
+  wlRender();
+}
+
+function wlClear() {
+  if (!WL.stocks.length) return;
+  if (!confirm('Remove all ' + WL.stocks.length + ' stocks from your watchlist?')) return;
+  WL.stocks = []; WL.quotes = {};
+  wlSave(); wlRender();
+}
+
+function wlRefreshNow() {
+  var btn = document.getElementById('wl-refresh-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '\u2026'; }
+  wlRefreshPrices().finally(function() {
+    if (btn) { btn.disabled = false; btn.textContent = '\u21bb Refresh'; }
+  });
+}
+
+function wlFlash(msg) {
+  var el = document.getElementById('wl-status');
+  if (el) { el.textContent = msg; setTimeout(function() { if (el.textContent === msg) el.textContent = ''; }, 3000); }
+}
+
+async function wlEnsureSymbols() {
+  if (WL.symbols.length) return;
+  var base = (typeof PROXY_URL !== 'undefined' && PROXY_URL) ? PROXY_URL : '';
+  try {
+    var resp = await fetch(base + '/api/nse-symbols');
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    var json = await resp.json();
+    WL.symbols = json.all || [];
+    WL.presets = json.presets || {};
+  } catch (e) {
+    console.warn('[WL] symbol list unavailable:', e.message);
+    var fb = ['ADANIENT','ADANIPORTS','APOLLOHOSP','ASIANPAINT','AXISBANK','BAJAJFINSV','BAJFINANCE',
+      'BHARTIARTL','BPCL','BRITANNIA','CIPLA','COALINDIA','DIVISLAB','DRREDDY','EICHERMOT',
+      'GRASIM','HCLTECH','HDFCBANK','HDFCLIFE','HEROMOTOCO','HINDALCO','HINDUNILVR',
+      'ICICIBANK','INDUSINDBK','INFY','ITC','JSWSTEEL','KOTAKBANK','LT','LTIM',
+      'M&M','MARUTI','NESTLEIND','NTPC','ONGC','POWERGRID','RELIANCE','SBILIFE',
+      'SBIN','SUNPHARMA','TATACONSUM','TATAMOTORS','TATASTEEL','TCS','TECHM',
+      'TITAN','ULTRACEMCO','UPL','WIPRO','ZOMATO'];
+    WL.symbols = fb.map(function(s) { return { symbol: s, name: s }; });
+    WL.presets = { nifty50: fb, nifty100: fb, nifty500: fb };
+  }
+}
+
+async function wlLoadPreset(preset) {
+  await wlEnsureSymbols();
+  var syms = WL.presets[preset] || [];
+  if (!syms.length) { wlFlash('\u26a0\ufe0f Could not load preset.'); return; }
+  var existing = new Set(WL.stocks.map(function(s) { return s.symbol; }));
+  var symMap   = new Map(WL.symbols.map(function(s) { return [s.symbol, s.name]; }));
+  var added = 0;
+  syms.forEach(function(sym) {
+    if (!existing.has(sym)) { WL.stocks.push({ symbol: sym, name: symMap.get(sym) || sym }); added++; }
+  });
+  wlSave(); wlRender();
+  wlFlash('\u2705 Added ' + added + ' stocks (' + WL.stocks.length + ' total)');
+  wlRefreshPrices();
+}
+
+function wlAddFromSearch() {
+  var input = document.getElementById('wl-search');
+  if (!input || !input.value.trim()) return;
+  var val   = input.value.trim().toUpperCase();
+  var match = WL.symbols.find(function(s) { return s.symbol === val; }) || { symbol: val, name: val };
+  wlAdd(match.symbol, match.name);
+  input.value = '';
+  var dd = document.getElementById('wl-suggestions');
+  if (dd) dd.style.display = 'none';
+}
+
+function initWatchlistSearch() {
+  var input    = document.getElementById('wl-search');
+  var dropdown = document.getElementById('wl-suggestions');
+  if (!input || !dropdown) return;
+  var debounce;
+  input.addEventListener('input', function() {
+    clearTimeout(debounce);
+    var q = input.value.trim().toUpperCase();
+    if (q.length < 1) { dropdown.style.display = 'none'; return; }
+    debounce = setTimeout(async function() {
+      await wlEnsureSymbols();
+      var results = WL.symbols
+        .filter(function(s) { return s.symbol.includes(q) || (s.name || '').toUpperCase().includes(q); })
+        .slice(0, 12);
+      if (!results.length) { dropdown.style.display = 'none'; return; }
+      dropdown.innerHTML = results.map(function(s) {
+        var ne = (s.name || '').replace(/'/g, "\\'");
+        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--border);font-size:13px"' +
+          ' onmouseenter="this.style.background=\'var(--surface-3)\'" onmouseleave="this.style.background=\'\'"' +
+          ' onclick="wlAdd(\'' + s.symbol + '\',\'' + ne + '\');document.getElementById(\'wl-search\').value=\'\';document.getElementById(\'wl-suggestions\').style.display=\'none\'">' +
+          '<span style="font-family:var(--font-mono);font-weight:600;color:var(--text-primary)">' + s.symbol + '</span>' +
+          '<span style="color:var(--text-muted);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px">' + (s.name || '') + '</span>' +
+          '</div>';
+      }).join('');
+      dropdown.style.display = 'block';
+    }, 180);
+  });
+  input.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter')  wlAddFromSearch();
+    if (e.key === 'Escape') { dropdown.style.display = 'none'; input.blur(); }
+  });
+  document.addEventListener('click', function(e) {
+    if (!input.contains(e.target) && !dropdown.contains(e.target)) dropdown.style.display = 'none';
+  });
+}
+
+(function() {
+  wlLoad();
+  wlEnsureSymbols().catch(function() {});
+  document.addEventListener('DOMContentLoaded', function() {
+    wlRender();
+    initWatchlistSearch();
+    document.querySelectorAll('.nav-item[data-tab="watchlist"]').forEach(function(el) {
+      el.addEventListener('click', function() {
+        wlRender();
+        if (WL.stocks.length) wlRefreshPrices();
+      });
+    });
+    setInterval(function() { if (WL.stocks.length) wlRefreshPrices(); }, 90000);
+  });
+})();

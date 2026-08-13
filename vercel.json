@@ -9,7 +9,8 @@
     { "src": "api/status.js",        "use": "@vercel/node"   },
     { "src": "api/market-status.js", "use": "@vercel/node"   },
     { "src": "api/gainers-losers.js","use": "@vercel/node"   },
-    { "src": "api/fii-dii.js",       "use": "@vercel/node"   }
+    { "src": "api/fii-dii.js",       "use": "@vercel/node"   },
+    { "src": "api/nse-symbols.js",   "use": "@vercel/node"   }
   ],
   "routes": [
     { "src": "/api/options/([^/]+)", "dest": "/api/options.js?symbol=$1" },
@@ -20,6 +21,7 @@
     { "src": "/api/market-status",   "dest": "/api/market-status.js"     },
     { "src": "/api/gainers-losers",  "dest": "/api/gainers-losers.js"    },
     { "src": "/api/fii-dii",         "dest": "/api/fii-dii.js"           },
+    { "src": "/api/nse-symbols",     "dest": "/api/nse-symbols.js"       },
     { "src": "/app.js",              "dest": "/public/app.js"            },
     { "src": "/style.css",           "dest": "/public/style.css"         },
     { "src": "/(.*)",                "dest": "/public/index.html"        }

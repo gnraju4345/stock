@@ -28,6 +28,11 @@
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
         Overview
       </a>
+      <a class="nav-item" data-tab="watchlist" href="#">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+        My Watchlist
+        <span class="live-badge">LIVE</span>
+      </a>
       <a class="nav-item" data-tab="momentum" href="#">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
         Momentum Scanner
@@ -228,6 +233,77 @@
           <div class="card">
             <div class="card-header"><h2 class="card-title">🔔 Today's Alerts</h2><span class="badge-count">7</span></div>
             <div class="alert-list" id="overview-alerts"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- WATCHLIST TAB -->
+      <section class="tab-content" id="tab-watchlist">
+        <div class="page-header">
+          <div>
+            <h1 class="page-title">📋 My Watchlist</h1>
+            <p class="page-subtitle">Track any NSE stock with live prices. Saved across sessions.</p>
+          </div>
+          <div id="wl-status" style="font-size:12px;color:var(--text-muted)"></div>
+        </div>
+
+        <!-- Controls row -->
+        <div class="card" style="margin-bottom:16px">
+          <div style="display:flex;flex-wrap:wrap;gap:12px;align-items:center">
+            <!-- Search input -->
+            <div style="position:relative;flex:1;min-width:220px">
+              <input
+                id="wl-search"
+                type="text"
+                placeholder="Search any NSE stock (e.g. ZOMATO, MRF…)"
+                autocomplete="off"
+                style="width:100%;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;color:var(--text-primary);font-size:13px;outline:none"
+              />
+              <div id="wl-suggestions" style="display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:200;background:var(--surface-2);border:1px solid var(--border);border-radius:8px;max-height:240px;overflow-y:auto;box-shadow:0 8px 32px rgba(0,0,0,.5)"></div>
+            </div>
+            <!-- Add button -->
+            <button id="wl-add-btn" onclick="wlAddFromSearch()" style="background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 20px;font-size:13px;font-weight:600;cursor:pointer">+ Add Stock</button>
+            <!-- Preset loaders -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <button onclick="wlLoadPreset('nifty50')"  style="background:rgba(16,185,129,0.15);color:#10b981;border:1px solid rgba(16,185,129,0.3);border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">⚡ Nifty 50</button>
+              <button onclick="wlLoadPreset('nifty100')" style="background:rgba(59,130,246,0.15);color:#60a5fa;border:1px solid rgba(59,130,246,0.3);border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">📊 Nifty 100</button>
+              <button onclick="wlLoadPreset('nifty500')" style="background:rgba(139,92,246,0.15);color:#a78bfa;border:1px solid rgba(139,92,246,0.3);border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🌐 Nifty 500</button>
+              <button onclick="wlClear()" style="background:rgba(239,68,68,0.12);color:#f87171;border:1px solid rgba(239,68,68,0.25);border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;cursor:pointer">🗑 Clear All</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live price table -->
+        <div class="card" style="overflow:hidden">
+          <div class="card-header">
+            <h2 class="card-title" id="wl-count">Watchlist</h2>
+            <button onclick="wlRefreshNow()" id="wl-refresh-btn" style="background:var(--surface-3);border:1px solid var(--border);color:var(--text-secondary);border-radius:6px;padding:6px 14px;font-size:12px;cursor:pointer">↻ Refresh</button>
+          </div>
+          <div id="wl-empty" style="text-align:center;padding:48px 24px;color:var(--text-muted)">
+            <div style="font-size:40px;margin-bottom:12px">📭</div>
+            <div style="font-size:15px;font-weight:600;margin-bottom:6px">Your watchlist is empty</div>
+            <div style="font-size:13px">Search for a stock above, or load a preset to get started.</div>
+          </div>
+          <div id="wl-table-wrap" style="display:none;overflow-x:auto">
+            <table class="data-table" id="wl-table">
+              <thead>
+                <tr>
+                  <th style="text-align:left">Symbol</th>
+                  <th style="text-align:left">Name</th>
+                  <th style="text-align:right">Price (₹)</th>
+                  <th style="text-align:right">Change</th>
+                  <th style="text-align:right">% Chg</th>
+                  <th style="text-align:right">Open</th>
+                  <th style="text-align:right">High</th>
+                  <th style="text-align:right">Low</th>
+                  <th style="text-align:right">Volume</th>
+                  <th style="text-align:center">Source</th>
+                  <th style="text-align:center">Chart</th>
+                  <th style="text-align:center"></th>
+                </tr>
+              </thead>
+              <tbody id="wl-tbody"></tbody>
+            </table>
           </div>
         </div>
       </section>
