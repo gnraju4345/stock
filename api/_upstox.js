@@ -16,6 +16,15 @@ function upstoxHeaders() {
   };
 }
 
+/* ── Index symbol → Upstox instrument_key ── */
+const INDEX_KEYS = {
+  'NIFTY':      'NSE_INDEX|Nifty 50',
+  'BANKNIFTY':  'NSE_INDEX|Nifty Bank',
+  'FINNIFTY':   'NSE_INDEX|Nifty Fin Service',
+  'MIDCPNIFTY': 'NSE_INDEX|NIFTY MID SELECT',
+  'SENSEX':     'BSE_INDEX|SENSEX',
+};
+
 /* ── Symbol → Upstox instrument_key map (NSE_EQ | ISIN) ── */
 const SYMBOL_MAP = {
   'ABB':         'NSE_EQ|INE117A01022',
@@ -140,20 +149,24 @@ async function getStockQuotes(symbols) {
 
 /**
  * Fetch index quotes.
- * Returns: { NIFTY50, BANKNIFTY, SENSEX }
+ * Returns: { NIFTY50, BANKNIFTY, FINNIFTY, MIDCPNIFTY, SENSEX }
  */
 async function getIndexQuotes() {
   const keys = [
     'NSE_INDEX|Nifty 50',
     'NSE_INDEX|Nifty Bank',
+    'NSE_INDEX|Nifty Fin Service',
+    'NSE_INDEX|NIFTY MID SELECT',
     'BSE_INDEX|SENSEX',
   ];
   const rawData = await upstoxQuotes(keys);
 
   const map = {
-    'NSE_INDEX:Nifty 50':  'NIFTY50',
-    'NSE_INDEX:Nifty Bank': 'BANKNIFTY',
-    'BSE_INDEX:SENSEX':     'SENSEX',
+    'NSE_INDEX:Nifty 50':         'NIFTY50',
+    'NSE_INDEX:Nifty Bank':       'BANKNIFTY',
+    'NSE_INDEX:Nifty Fin Service': 'FINNIFTY',
+    'NSE_INDEX:NIFTY MID SELECT':  'MIDCPNIFTY',
+    'BSE_INDEX:SENSEX':            'SENSEX',
   };
 
   const result = {};
@@ -162,16 +175,69 @@ async function getIndexQuotes() {
     if (!name) continue;
     const prev = v.ohlc?.close || v.last_price;
     result[name] = {
-      last:       v.last_price  || 0,
-      change:     v.net_change  || 0,
-      pChange:    prev ? +((v.net_change / prev) * 100).toFixed(2) : 0,
-      open:       v.ohlc?.open || 0,
-      high:       v.ohlc?.high || 0,
-      low:        v.ohlc?.low  || 0,
-      prevClose:  prev          || 0,
+      last:      v.last_price  || 0,
+      change:    v.net_change  || 0,
+      pChange:   prev ? +((v.net_change / prev) * 100).toFixed(2) : 0,
+      open:      v.ohlc?.open || 0,
+      high:      v.ohlc?.high || 0,
+      low:       v.ohlc?.low  || 0,
+      prevClose: prev          || 0,
     };
   }
   return result;
 }
 
-module.exports = { getStockQuotes, getIndexQuotes, upstoxQuotes, SYMBOL_MAP, getToken };
+/**
+ * Get available option expiry dates for a symbol (index or equity).
+ * Returns: string[] of YYYY-MM-DD dates sorted ascending (nearest first).
+ */
+async function getOptionExpiries(symbol) {
+  const instrKey = INDEX_KEYS[symbol] || SYMBOL_MAP[symbol];
+  if (!instrKey) throw new Error(`No instrument key for ${symbol}`);
+  const token = getToken();
+  if (!token) throw new Error('UPSTOX_TOKEN not set');
+
+  const url = `${BASE}/option/contract?instrument_key=${encodeURIComponent(instrKey)}`;
+  const resp = await fetch(url, { headers: upstoxHeaders(), timeout: 10000 });
+  if (!resp.ok) throw new Error(`Upstox HTTP ${resp.status} on option/contract`);
+  const json = await resp.json();
+  if (json.status !== 'success') throw new Error(json.errors?.[0]?.message || 'Upstox option/contract error');
+
+  // Extract unique expiry dates from contracts list
+  const dates = [...new Set((json.data || []).map(c => c.expiry))]
+    .filter(Boolean)
+    .sort(); // YYYY-MM-DD sorts lexicographically = chronologically
+  return dates;
+}
+
+/**
+ * Fetch raw options chain from Upstox for a given symbol + expiry date.
+ * @param {string} symbol  - e.g. 'NIFTY', 'BANKNIFTY', 'INFY'
+ * @param {string} expiryDate - YYYY-MM-DD format
+ * Returns: raw Upstox option chain array
+ */
+async function getOptionsChain(symbol, expiryDate) {
+  const instrKey = INDEX_KEYS[symbol] || SYMBOL_MAP[symbol];
+  if (!instrKey) throw new Error(`No instrument key for ${symbol}`);
+  const token = getToken();
+  if (!token) throw new Error('UPSTOX_TOKEN not set');
+
+  const url = `${BASE}/option/chain?instrument_key=${encodeURIComponent(instrKey)}&expiry_date=${expiryDate}`;
+  const resp = await fetch(url, { headers: upstoxHeaders(), timeout: 12000 });
+  if (!resp.ok) throw new Error(`Upstox HTTP ${resp.status} on option/chain`);
+  const json = await resp.json();
+  if (json.status !== 'success') throw new Error(json.errors?.[0]?.message || 'Upstox option/chain error');
+
+  return json.data || [];
+}
+
+module.exports = {
+  getStockQuotes,
+  getIndexQuotes,
+  getOptionExpiries,
+  getOptionsChain,
+  upstoxQuotes,
+  SYMBOL_MAP,
+  INDEX_KEYS,
+  getToken,
+};
